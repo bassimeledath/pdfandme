@@ -81,6 +81,7 @@ function PageView({ meta, ord, onRequestImage }: Props) {
         })
         s.setTool('select')
         s.select(id)
+        s.setEditing(id)
         return
       }
       case 'date': {

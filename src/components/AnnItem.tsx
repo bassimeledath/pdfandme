@@ -104,6 +104,12 @@ export default function AnnItem({ ann, zoom }: Props) {
       onPointerDown={(e) => beginDrag(e, 'move')}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
+      onDoubleClick={(e) => {
+        if (ann.type !== 'text' || !interactive) return
+        e.stopPropagation()
+        store.getState().select(ann.id)
+        store.getState().setEditing(ann.id)
+      }}
     >
       <Body ann={ann} zoom={zoom} selected={selected} />
       {selected && (
@@ -231,16 +237,16 @@ function Body({ ann, zoom, selected }: { ann: Ann; zoom: number; selected: boole
 
 function TextBody({ ann, zoom }: { ann: TextAnn; zoom: number }) {
   const ref = useRef<HTMLTextAreaElement>(null)
+  const editing = useStore((s) => s.editing === ann.id)
   const store = useStore
 
-  // autofocus newly created empty text boxes — after the creating click has
-  // fully settled, so the browser's own focus handling can't blur us away
+  // focus when entering edit mode — after the triggering click has settled,
+  // so the browser's own focus handling can't blur us away
   useEffect(() => {
-    if (ann.text !== '') return
+    if (!editing) return
     const t = setTimeout(() => ref.current?.focus(), 60)
     return () => clearTimeout(t)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [editing])
 
   const grow = () => {
     const el = ref.current
@@ -252,24 +258,26 @@ function TextBody({ ann, zoom }: { ann: TextAnn; zoom: number }) {
   }
 
   return (
-    <div className="body">
+    <div className="body" title={editing ? undefined : 'Drag to move — double-click to edit'}>
       <textarea
         ref={ref}
         value={ann.text}
         placeholder="Type…"
         spellCheck={false}
-        style={{ fontSize: ann.size * zoom, color: ann.color }}
-        onPointerDown={(e) => {
-          // typing shouldn't start a drag; still select the annotation
-          e.stopPropagation()
-          store.getState().select(ann.id)
+        style={{
+          fontSize: ann.size * zoom,
+          color: ann.color,
+          // when not editing, let clicks fall through to the draggable body
+          pointerEvents: editing ? 'auto' : 'none',
         }}
+        onPointerDown={(e) => e.stopPropagation()}
         onFocus={() => store.getState().commit()}
         onChange={(e) => {
           store.getState().updateAnn(ann.id, { text: e.target.value })
           grow()
         }}
         onBlur={() => {
+          store.getState().setEditing(null)
           if (ann.text.trim() === '') store.getState().removeAnn(ann.id)
         }}
       />

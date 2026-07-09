@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { newId, useStore } from '../store'
-import { displaySize } from '../types'
+import { Ann, displaySize } from '../types'
 import Toolbar from './Toolbar'
 import PageView from './PageView'
 import PagesRail from './PagesRail'
@@ -24,6 +24,7 @@ export default function Editor() {
   const [exporting, setExporting] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const fittedRef = useRef(false)
+  const clipboardRef = useRef<Ann | null>(null)
 
   const livePages = s.pages.filter((p) => !p.deleted)
 
@@ -42,11 +43,29 @@ export default function Editor() {
       const el = document.activeElement
       const typing =
         el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
+      const mod = e.metaKey || e.ctrlKey
+      if (mod && e.key.toLowerCase() === 'z') {
         if (typing) return
         e.preventDefault()
         if (e.shiftKey) s.redo()
         else s.undo()
+      } else if (mod && e.key.toLowerCase() === 'c' && !typing && s.selected) {
+        const src = s.anns.find((a) => a.id === s.selected)
+        if (src) clipboardRef.current = { ...src }
+      } else if (mod && e.key.toLowerCase() === 'v' && !typing && clipboardRef.current) {
+        e.preventDefault()
+        const pasted: Ann = {
+          ...clipboardRef.current,
+          id: newId(),
+          x: clipboardRef.current.x + 16,
+          y: clipboardRef.current.y + 16,
+        }
+        s.addAnn(pasted)
+        // successive pastes cascade instead of stacking
+        clipboardRef.current = { ...pasted }
+      } else if (mod && e.key.toLowerCase() === 'd' && !typing && s.selected) {
+        e.preventDefault()
+        s.duplicateAnn(s.selected)
       } else if ((e.key === 'Delete' || e.key === 'Backspace') && !typing && s.selected) {
         e.preventDefault()
         s.removeAnn(s.selected)

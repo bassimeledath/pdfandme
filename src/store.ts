@@ -49,6 +49,8 @@ interface State {
   tool: Tool
   zoom: number
   selected: string | null
+  /** Text annotation currently in typing mode (double-click to enter). */
+  editing: string | null
   railOpen: boolean
   toastDismissed: boolean
   sigModalOpen: boolean
@@ -65,6 +67,7 @@ interface State {
   setTool: (t: Tool) => void
   setZoom: (z: number) => void
   select: (id: string | null) => void
+  setEditing: (id: string | null) => void
   setRailOpen: (v: boolean) => void
   dismissToast: () => void
   setSigModal: (open: boolean, pos?: { page: number; x: number; y: number } | null) => void
@@ -106,6 +109,7 @@ export const useStore = create<State>((set, get) => ({
   tool: 'select',
   zoom: 1,
   selected: null,
+  editing: null,
   railOpen: false,
   toastDismissed: false,
   sigModalOpen: false,
@@ -163,9 +167,11 @@ export const useStore = create<State>((set, get) => ({
     }),
 
   setPhase: (phase) => set({ phase }),
-  setTool: (tool) => set({ tool, selected: null }),
+  setTool: (tool) => set({ tool, selected: null, editing: null }),
   setZoom: (zoom) => set({ zoom: Math.min(2.4, Math.max(0.4, zoom)) }),
-  select: (selected) => set({ selected }),
+  select: (selected) =>
+    set((s) => ({ selected, editing: s.editing === selected ? s.editing : null })),
+  setEditing: (editing) => set({ editing }),
   setRailOpen: (railOpen) => set({ railOpen }),
   dismissToast: () => set({ toastDismissed: true }),
   setSigModal: (open, pos = null) => set({ sigModalOpen: open, pendingSigPos: pos }),
@@ -184,6 +190,7 @@ export const useStore = create<State>((set, get) => ({
         future: [...s.future, snapshot(s)],
         ...prev,
         selected: null,
+        editing: null,
       }
     }),
   redo: () =>
@@ -195,6 +202,7 @@ export const useStore = create<State>((set, get) => ({
         past: [...s.past, snapshot(s)],
         ...next,
         selected: null,
+        editing: null,
       }
     }),
 
@@ -214,6 +222,7 @@ export const useStore = create<State>((set, get) => ({
     set((s) => ({
       anns: s.anns.filter((a) => a.id !== id),
       selected: s.selected === id ? null : s.selected,
+      editing: s.editing === id ? null : s.editing,
     }))
   },
   duplicateAnn: (id) => {
