@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { newId, useStore } from '../store'
 import { Pt } from '../types'
-import { tryCapture } from './PageView'
+import { tryCapture } from '../utils'
 
 const SIG_INK = '#1A2F9E'
 const PAD_W = 394

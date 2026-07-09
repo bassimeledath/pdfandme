@@ -76,7 +76,7 @@ function Thumb({
 
   useEffect(() => {
     if (!pdf || !canvasRef.current) return
-    renderPage(pdf, meta, canvasRef.current, 0.18).catch(() => undefined)
+    return renderPage(pdf, meta, canvasRef.current, 0.18)
   }, [pdf, meta.src, meta.extraRot]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (

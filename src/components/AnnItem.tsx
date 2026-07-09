@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useStore } from '../store'
 import { Ann, InkAnn, StampAnn, TextAnn } from '../types'
 import { IcDup, IcTrash } from './icons'
-import { tryCapture } from './PageView'
+import { tryCapture } from '../utils'
 
 const COLORS = ['#211E19', '#A32035', '#1A2F9E']
 

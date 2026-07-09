@@ -53,22 +53,38 @@ export async function loadPdf(bytes: ArrayBuffer): Promise<LoadedPdf> {
   return { doc, pages, fields }
 }
 
-export async function renderPage(
+/**
+ * Kick off a page render. Returns a cancel function — call it before starting
+ * another render into the same canvas (pdf.js forbids overlapping renders).
+ */
+export function renderPage(
   doc: PDFDocumentProxy,
   meta: PageMeta,
   canvas: HTMLCanvasElement,
   zoom: number,
-): Promise<void> {
-  const page = await doc.getPage(meta.src + 1)
-  const dpr = Math.min(window.devicePixelRatio || 1, 2)
-  const viewport = page.getViewport({
-    scale: zoom * dpr,
-    rotation: meta.srcRot + meta.extraRot,
+): () => void {
+  let cancelled = false
+  let task: ReturnType<Awaited<ReturnType<PDFDocumentProxy['getPage']>>['render']> | null = null
+  ;(async () => {
+    const page = await doc.getPage(meta.src + 1)
+    if (cancelled) return
+    const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    const viewport = page.getViewport({
+      scale: zoom * dpr,
+      rotation: meta.srcRot + meta.extraRot,
+    })
+    canvas.width = Math.floor(viewport.width)
+    canvas.height = Math.floor(viewport.height)
+    canvas.style.width = `${Math.floor(viewport.width / dpr)}px`
+    canvas.style.height = `${Math.floor(viewport.height / dpr)}px`
+    const ctx = canvas.getContext('2d')!
+    task = page.render({ canvasContext: ctx, viewport })
+    await task.promise
+  })().catch((e: unknown) => {
+    if ((e as Error)?.name !== 'RenderingCancelledException') console.error('render failed', e)
   })
-  canvas.width = Math.floor(viewport.width)
-  canvas.height = Math.floor(viewport.height)
-  canvas.style.width = `${Math.floor(viewport.width / dpr)}px`
-  canvas.style.height = `${Math.floor(viewport.height / dpr)}px`
-  const ctx = canvas.getContext('2d')!
-  await page.render({ canvasContext: ctx, viewport }).promise
+  return () => {
+    cancelled = true
+    task?.cancel()
+  }
 }

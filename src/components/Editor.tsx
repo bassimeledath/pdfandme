@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { newId, useStore } from '../store'
 import { displaySize } from '../types'
-import { exportPdf } from '../pdf/export'
 import Toolbar from './Toolbar'
 import PageView from './PageView'
 import PagesRail from './PagesRail'
@@ -116,6 +115,8 @@ export default function Editor() {
     setDlOpen(false)
     setExporting(true)
     try {
+      // pdf-lib is only needed here — keep it out of the initial bundle
+      const { exportPdf } = await import('../pdf/export')
       const out = await exportPdf(s.bytes, s.pages, s.anns, s.fields, s.formValues, {
         flattenForm,
       })

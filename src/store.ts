@@ -273,3 +273,8 @@ export const useStore = create<State>((set, get) => ({
     })
   },
 }))
+
+// dev-only handle for driving the app in automated tests
+if (import.meta.env.DEV) {
+  ;(window as unknown as Record<string, unknown>).__store = useStore
+}

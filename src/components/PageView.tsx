@@ -3,6 +3,7 @@ import { newId, useStore } from '../store'
 import { PageMeta, Pt, displaySize } from '../types'
 import { rectToDisplay } from '../pdf/coords'
 import { renderPage } from '../pdf/pdfjs'
+import { tryCapture } from '../utils'
 import AnnItem from './AnnItem'
 import { IcCheck } from './icons'
 
@@ -15,15 +16,6 @@ interface Props {
 const INK = '#211E19'
 const SIG_INK = '#1A2F9E'
 
-/** setPointerCapture throws for synthetic events (tests) and exotic devices — capture is a nice-to-have. */
-export function tryCapture(el: Element, pointerId: number) {
-  try {
-    el.setPointerCapture(pointerId)
-  } catch {
-    /* fine without capture */
-  }
-}
-
 function PageView({ meta, ord, onRequestImage }: Props) {
   const pdf = useStore((s) => s.pdf)
   const zoom = useStore((s) => s.zoom)
@@ -35,7 +27,14 @@ function PageView({ meta, ord, onRequestImage }: Props) {
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
-  const dragRef = useRef<{ kind: 'rect' | 'ink'; sx: number; sy: number; pts: Pt[] } | null>(null)
+  const dragRef = useRef<{
+    kind: 'rect' | 'ink'
+    sx: number
+    sy: number
+    lx: number
+    ly: number
+    pts: Pt[]
+  } | null>(null)
   const [rectPrev, setRectPrev] = useState<{ x: number; y: number; w: number; h: number } | null>(null)
   const [inkPrev, setInkPrev] = useState<Pt[] | null>(null)
 
@@ -45,14 +44,7 @@ function PageView({ meta, ord, onRequestImage }: Props) {
 
   useEffect(() => {
     if (!pdf || !canvasRef.current) return
-    let cancelled = false
-    const canvas = canvasRef.current
-    renderPage(pdf, meta, canvas, zoom).catch((e) => {
-      if (!cancelled) console.error('render failed', e)
-    })
-    return () => {
-      cancelled = true
-    }
+    return renderPage(pdf, meta, canvasRef.current, zoom)
   }, [pdf, meta.src, meta.extraRot, zoom]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const toLocal = (e: React.PointerEvent): Pt => {
@@ -151,13 +143,13 @@ function PageView({ meta, ord, onRequestImage }: Props) {
         return
       case 'highlight':
       case 'whiteout': {
-        dragRef.current = { kind: 'rect', sx: x, sy: y, pts: [] }
+        dragRef.current = { kind: 'rect', sx: x, sy: y, lx: x, ly: y, pts: [] }
         tryCapture(overlayRef.current!, e.pointerId)
         setRectPrev({ x, y, w: 0, h: 0 })
         return
       }
       case 'draw': {
-        dragRef.current = { kind: 'ink', sx: x, sy: y, pts: [[x, y]] }
+        dragRef.current = { kind: 'ink', sx: x, sy: y, lx: x, ly: y, pts: [[x, y]] }
         tryCapture(overlayRef.current!, e.pointerId)
         setInkPrev([[x, y]])
         return
@@ -169,6 +161,8 @@ function PageView({ meta, ord, onRequestImage }: Props) {
     const drag = dragRef.current
     if (!drag) return
     const [x, y] = toLocal(e)
+    drag.lx = x
+    drag.ly = y
     if (drag.kind === 'rect') {
       setRectPrev({
         x: Math.min(drag.sx, x),
@@ -187,15 +181,21 @@ function PageView({ meta, ord, onRequestImage }: Props) {
     dragRef.current = null
     const s = store.getState()
     if (!drag) return
-    if (drag.kind === 'rect' && rectPrev) {
+    if (drag.kind === 'rect') {
       setRectPrev(null)
-      if (rectPrev.w > 4 && rectPrev.h > 3) {
+      const rect = {
+        x: Math.min(drag.sx, drag.lx),
+        y: Math.min(drag.sy, drag.ly),
+        w: Math.abs(drag.lx - drag.sx),
+        h: Math.abs(drag.ly - drag.sy),
+      }
+      if (rect.w > 4 && rect.h > 3) {
         s.addAnn(
           {
             id: newId(),
             type: tool === 'highlight' ? 'highlight' : 'whiteout',
             page: meta.src,
-            ...rectPrev,
+            ...rect,
           },
           { select: false },
         )
