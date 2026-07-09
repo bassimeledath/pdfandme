@@ -47,9 +47,30 @@ function PageView({ meta, ord, onRequestImage }: Props) {
     return renderPage(pdf, meta, canvasRef.current, zoom)
   }, [pdf, meta.src, meta.extraRot, zoom]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const toLocal = (e: React.PointerEvent): Pt => {
+  const toLocal = (e: { clientX: number; clientY: number }): Pt => {
     const r = overlayRef.current!.getBoundingClientRect()
     return [(e.clientX - r.left) / zoom, (e.clientY - r.top) / zoom]
+  }
+
+  const addTextAt = (x: number, y: number) => {
+    const s = store.getState()
+    const size = 14
+    const id = newId()
+    s.addAnn({
+      id,
+      type: 'text',
+      page: meta.src,
+      x,
+      y: y - size,
+      w: 220,
+      h: size * 1.6 + 8,
+      text: '',
+      size,
+      color: INK,
+    })
+    s.setTool('select')
+    s.select(id)
+    s.setEditing(id)
   }
 
   const onPointerDown = (e: React.PointerEvent) => {
@@ -65,23 +86,7 @@ function PageView({ meta, ord, onRequestImage }: Props) {
         // prevent the click's default focus-steal from blurring (and thus
         // deleting) the freshly created empty text box
         e.preventDefault()
-        const size = 14
-        const id = newId()
-        s.addAnn({
-          id,
-          type: 'text',
-          page: meta.src,
-          x,
-          y: y - size,
-          w: 220,
-          h: size * 1.6 + 8,
-          text: '',
-          size,
-          color: INK,
-        })
-        s.setTool('select')
-        s.select(id)
-        s.setEditing(id)
+        addTextAt(x, y)
         return
       }
       case 'date': {
@@ -251,6 +256,13 @@ function PageView({ meta, ord, onRequestImage }: Props) {
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
+        onDoubleClick={(e) => {
+          // double-click on empty page in select mode = quick text box
+          if (tool !== 'select' || e.target !== overlayRef.current) return
+          e.preventDefault()
+          const [x, y] = toLocal(e)
+          addTextAt(x, y)
+        }}
       >
         {/* detected form fields */}
         {pageFields.map((f) => {
