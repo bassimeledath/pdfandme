@@ -268,7 +268,7 @@ button { font-family: var(--sans); cursor: pointer; }
 .ctx-bar button svg { width: 14px; height: 14px; }
 .ctx-bar .vr { width: 1px; height: 18px; background: rgba(255, 255, 255, 0.18); margin: 0 3px; }
 .ctx-bar .size { font-family: var(--mono); font-size: 11px; color: #fff; min-width: 22px; text-align: center; }
-.ctx-bar .dotc { width: 15px; height: 15px; border-radius: 50%; border: 2px solid transparent; padding: 0; }
+.ctx-bar .dotc { width: 15px; min-width: 15px; height: 15px; flex: none; border-radius: 50%; border: 2px solid transparent; padding: 0; }
 .ctx-bar .dotc.on { border-color: #fff; }
 
 /* form fields */
@@ -333,6 +333,20 @@ button { font-family: var(--sans); cursor: pointer; }
 .sig-pad svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .sig-pad .base { position: absolute; left: 16px; right: 16px; bottom: 34px; border-bottom: 1px solid var(--line-strong); pointer-events: none; }
 .sig-pad .x-mark { position: absolute; left: 16px; bottom: 38px; font-family: var(--mono); font-size: 11px; color: var(--ink-3); pointer-events: none; }
+.sig-opts { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
+.opt-group { display: flex; align-items: center; gap: 8px; }
+.ink-dot {
+  width: 22px; height: 22px; border-radius: 50%; border: 2px solid transparent; padding: 0;
+  box-shadow: inset 0 0 0 2px var(--white), 0 0 0 1px var(--line);
+  transition: box-shadow 0.15s;
+}
+.ink-dot.on { box-shadow: inset 0 0 0 2px var(--white), 0 0 0 2px var(--ink); }
+.width-btn {
+  width: 42px; height: 28px; border-radius: 8px; border: 1px solid var(--line); background: none;
+  display: flex; align-items: center; justify-content: center; transition: border-color 0.15s, background 0.15s;
+}
+.width-btn span { display: block; width: 24px; border-radius: 2px; }
+.width-btn.on { border-color: var(--ink); background: var(--paper); }
 .sig-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
 .sig-actions .clear { background: none; border: none; font-size: 13.5px; color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; }
 .sig-actions .clear:hover { color: var(--ink); }

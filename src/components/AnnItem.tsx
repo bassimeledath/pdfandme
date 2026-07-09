@@ -128,6 +128,7 @@ export default function AnnItem({ ann, zoom }: Props) {
 function CtxBar({ ann }: { ann: Ann }) {
   const store = useStore
   const isText = ann.type === 'text'
+  const isInk = ann.type === 'ink' || ann.type === 'sig'
   return (
     <div className="ctx-bar" onPointerDown={(e) => e.stopPropagation()}>
       {isText && (
@@ -150,10 +151,44 @@ function CtxBar({ ann }: { ann: Ann }) {
             +
           </button>
           <span className="vr" />
+        </>
+      )}
+      {isInk && (
+        <>
+          <button
+            title="Thinner"
+            onClick={() =>
+              store
+                .getState()
+                .updateAnn(ann.id, {
+                  strokeWidth: Math.max(0.8, +((ann as InkAnn).strokeWidth - 0.4).toFixed(1)),
+                })
+            }
+          >
+            −
+          </button>
+          <span className="size">{(ann as InkAnn).strokeWidth.toFixed(1)}</span>
+          <button
+            title="Thicker"
+            onClick={() =>
+              store
+                .getState()
+                .updateAnn(ann.id, {
+                  strokeWidth: Math.min(6, +((ann as InkAnn).strokeWidth + 0.4).toFixed(1)),
+                })
+            }
+          >
+            +
+          </button>
+          <span className="vr" />
+        </>
+      )}
+      {(isText || isInk) && (
+        <>
           {COLORS.map((c) => (
             <button
               key={c}
-              className={`dotc${(ann as TextAnn).color === c ? ' on' : ''}`}
+              className={`dotc${(ann as TextAnn | InkAnn).color === c ? ' on' : ''}`}
               style={{ background: c }}
               title="Ink color"
               onClick={() => store.getState().updateAnn(ann.id, { color: c })}
@@ -198,9 +233,12 @@ function TextBody({ ann, zoom }: { ann: TextAnn; zoom: number }) {
   const ref = useRef<HTMLTextAreaElement>(null)
   const store = useStore
 
-  // autofocus newly created empty text boxes
+  // autofocus newly created empty text boxes — after the creating click has
+  // fully settled, so the browser's own focus handling can't blur us away
   useEffect(() => {
-    if (ann.text === '') ref.current?.focus()
+    if (ann.text !== '') return
+    const t = setTimeout(() => ref.current?.focus(), 60)
+    return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

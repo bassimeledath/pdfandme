@@ -62,9 +62,13 @@ function PageView({ meta, ord, onRequestImage }: Props) {
         if (e.target === overlayRef.current) s.select(null)
         return
       case 'text': {
+        // prevent the click's default focus-steal from blurring (and thus
+        // deleting) the freshly created empty text box
+        e.preventDefault()
         const size = 14
+        const id = newId()
         s.addAnn({
-          id: newId(),
+          id,
           type: 'text',
           page: meta.src,
           x,
@@ -76,14 +80,17 @@ function PageView({ meta, ord, onRequestImage }: Props) {
           color: INK,
         })
         s.setTool('select')
+        s.select(id)
         return
       }
       case 'date': {
+        e.preventDefault()
         const size = 13
         const d = new Date()
         const text = `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}-${d.getFullYear()}`
+        const id = newId()
         s.addAnn({
-          id: newId(),
+          id,
           type: 'text',
           page: meta.src,
           x,
@@ -95,6 +102,7 @@ function PageView({ meta, ord, onRequestImage }: Props) {
           color: INK,
         })
         s.setTool('select')
+        s.select(id)
         return
       }
       case 'check':
@@ -132,8 +140,8 @@ function PageView({ meta, ord, onRequestImage }: Props) {
           w: w0,
           h: h0,
           strokes: sig.strokes,
-          color: SIG_INK,
-          strokeWidth: 2.2,
+          color: sig.color ?? SIG_INK,
+          strokeWidth: sig.strokeWidth ?? 2.2,
         })
         s.setTool('select')
         return

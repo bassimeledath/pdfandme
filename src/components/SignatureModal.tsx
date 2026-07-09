@@ -3,14 +3,27 @@ import { newId, useStore } from '../store'
 import { Pt } from '../types'
 import { tryCapture } from '../utils'
 
-const SIG_INK = '#1A2F9E'
 const PAD_W = 394
 const PAD_H = 160
 
+const INKS = [
+  { hex: '#211E19', name: 'Black ink' },
+  { hex: '#1A2F9E', name: 'Blue ink' },
+  { hex: '#A32035', name: 'Maroon ink' },
+]
+const WIDTHS = [
+  { w: 1.4, name: 'Thin' },
+  { w: 2.2, name: 'Regular' },
+  { w: 3.4, name: 'Thick' },
+]
+
 export default function SignatureModal() {
   const store = useStore
+  const saved = useStore((s) => s.savedSig)
   const [strokes, setStrokes] = useState<Pt[][]>([])
   const [remember, setRemember] = useState(true)
+  const [color, setColor] = useState(saved?.color ?? '#211E19')
+  const [width, setWidth] = useState(saved?.strokeWidth ?? 2.2)
   const drawing = useRef<Pt[] | null>(null)
   const svgRef = useRef<SVGSVGElement>(null)
 
@@ -47,7 +60,7 @@ export default function SignatureModal() {
     const norm = strokes
       .filter((st) => st.length > 0)
       .map((st) => st.map(([x, y]) => [(x - x0) / w, (y - y0) / h] as Pt))
-    const sig = { strokes: norm, aspect: h / w }
+    const sig = { strokes: norm, aspect: h / w, color, strokeWidth: width }
 
     const s = store.getState()
     if (remember) s.setSavedSig(sig)
@@ -64,12 +77,17 @@ export default function SignatureModal() {
         w: w0,
         h: h0,
         strokes: sig.strokes,
-        color: SIG_INK,
-        strokeWidth: 2.2,
+        color,
+        strokeWidth: width,
       })
+      s.setSigModal(false)
+      s.setTool('select')
+    } else {
+      // drawn from the "New signature" entry — arm the Sign tool so the
+      // next click places it
+      s.setSigModal(false)
+      s.setTool('sign')
     }
-    s.setSigModal(false)
-    s.setTool('select')
   }
 
   return (
@@ -92,14 +110,39 @@ export default function SignatureModal() {
                   key={i}
                   d={'M' + st.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join(' L')}
                   fill="none"
-                  stroke={SIG_INK}
-                  strokeWidth={2.4}
+                  stroke={color}
+                  strokeWidth={width}
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
               ) : null,
             )}
           </svg>
+        </div>
+        <div className="sig-opts">
+          <div className="opt-group">
+            {INKS.map((ink) => (
+              <button
+                key={ink.hex}
+                className={`ink-dot${color === ink.hex ? ' on' : ''}`}
+                style={{ background: ink.hex }}
+                title={ink.name}
+                onClick={() => setColor(ink.hex)}
+              />
+            ))}
+          </div>
+          <div className="opt-group">
+            {WIDTHS.map((opt) => (
+              <button
+                key={opt.w}
+                className={`width-btn${width === opt.w ? ' on' : ''}`}
+                title={opt.name}
+                onClick={() => setWidth(opt.w)}
+              >
+                <span style={{ height: opt.w, background: color }} />
+              </button>
+            ))}
+          </div>
         </div>
         <div className="sig-actions">
           <button className="clear" onClick={() => setStrokes([])}>

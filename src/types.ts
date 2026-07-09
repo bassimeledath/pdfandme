@@ -89,4 +89,6 @@ export interface SavedSignature {
   strokes: Pt[][]
   /** aspect = h / w of the drawn bounding box */
   aspect: number
+  color?: string
+  strokeWidth?: number
 }

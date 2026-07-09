@@ -37,6 +37,7 @@ export default function Toolbar() {
   const setTool = useStore((s) => s.setTool)
   const setRailOpen = useStore((s) => s.setRailOpen)
   const railOpen = useStore((s) => s.railOpen)
+  const setSigModal = useStore((s) => s.setSigModal)
   const [moreOpen, setMoreOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -96,6 +97,16 @@ export default function Toolbar() {
             >
               <IcPages />
               Pages
+            </button>
+            <button
+              className="pop-item"
+              onClick={() => {
+                setSigModal(true, null)
+                setMoreOpen(false)
+              }}
+            >
+              <IcSign />
+              New signature
             </button>
           </div>
         )}
