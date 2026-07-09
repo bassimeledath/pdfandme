@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pdfandme — Font Options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500&family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Gloock&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Big+Shoulders+Display:wght@600;800&family=Fragment+Mono&family=Spline+Sans+Mono:wght@400;500&family=Young+Serif&family=Libre+Caslon+Text:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600&f[]=switzer@400,500,600&f[]=boska@500,700&f[]=general-sans@400,500,600&f[]=zodiak@400,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F3EEE4; --card:#FBF8F2; --ink:#211E19; --ink-2:#6E675B; --ink-3:#9B9385;
+  --line:rgba(33,30,25,.13); --line-strong:rgba(33,30,25,.25);
+  --red:#A32035; --red-deep:#7E1827; --red-soft:rgba(163,32,53,.07);
+  --mono:'Spline Sans Mono',monospace; --ui:'Instrument Sans',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--ui);padding:64px 40px 90px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto}
+.kicker{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);margin-bottom:18px}
+h1.page{font-family:'Fraunces',serif;font-weight:500;font-size:40px;letter-spacing:-.015em;margin-bottom:10px}
+p.lede{color:var(--ink-2);max-width:62ch;font-size:15.5px;line-height:1.55;margin-bottom:48px}
+p.lede b{color:var(--ink);font-weight:600}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
+
+.option{border:1px solid var(--line-strong);border-radius:16px;background:var(--card);overflow:hidden;
+  box-shadow:0 1px 2px rgba(33,30,25,.05),0 20px 44px -26px rgba(33,30,25,.25)}
+.opt-head{display:flex;align-items:baseline;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.opt-head .num{font-family:var(--mono);font-size:12px;color:#fff;background:var(--red);border-radius:99px;padding:3px 10px;letter-spacing:.06em}
+.opt-head .name{font-weight:600;font-size:14.5px}
+.opt-head .vibe{font-size:12.5px;color:var(--ink-2);margin-left:auto;text-align:right}
+
+.stage{background:var(--paper);padding:38px 20px;display:flex;justify-content:center}
+.mock{width:100%;max-width:440px;border:1.5px dashed rgba(33,30,25,.3);border-radius:16px;background:rgba(255,255,255,.35);
+  padding:36px 26px 34px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.logo-row{display:flex;align-items:center;gap:8px;margin-bottom:22px}
+.logo-row svg{width:20px;height:20px}
+.mock h2{font-size:34px;line-height:1.06;letter-spacing:-.015em;font-weight:500}
+.mock .tag{margin-top:10px;font-size:15px;color:var(--red)}
+.cta{margin-top:24px;display:flex;align-items:center;gap:12px}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--red);color:#fff;border:none;border-radius:99px;
+  font-size:13px;font-weight:500;padding:10px 20px;font-family:var(--ui)}
+.or{font-size:12px;color:var(--ink-3)}
+.foot-note{padding:12px 18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-2)}
+.foot-note b{color:var(--ink);font-weight:600}
+
+/* ---- wordmark base ---- */
+.wm{font-family:'Fraunces',serif;font-weight:600;font-size:15px}
+.wm em{font-style:italic;font-weight:500;color:var(--red)}
+
+/* ============ option typography ============ */
+/* 1 current */
+.o1 h2{font-family:'Fraunces',serif;font-variation-settings:'opsz' 144}
+.o1 .tag{font-family:'Fraunces',serif;font-style:italic;font-size:16px}
+
+/* 2 Gloock */
+.o2 h2{font-family:'Gloock',serif;font-weight:400;letter-spacing:0}
+.o2 .tag{font-family:'Instrument Sans',sans-serif;font-weight:500;font-size:14px;letter-spacing:.01em}
+
+/* 3 Instrument Serif */
+.o3 h2{font-family:'Instrument Serif',serif;font-weight:400;font-size:38px}
+.o3 .tag{font-family:'Instrument Serif',serif;font-style:italic;font-size:17px}
+
+/* 4 Bricolage */
+.o4 h2{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;letter-spacing:-.025em}
+.o4 .tag{font-family:'Bricolage Grotesque',sans-serif;font-weight:400;font-size:14.5px}
+.o4 .wm{font-family:'Bricolage Grotesque',sans-serif;font-weight:800}
+.o4 .wm em{font-style:normal;font-weight:400}
+
+/* 5 Clash Display */
+.o5 h2{font-family:'Clash Display',sans-serif;font-weight:600;letter-spacing:-.01em}
+.o5 .tag{font-family:'Switzer',sans-serif;font-weight:400;font-size:14.5px}
+.o5 .wm{font-family:'Clash Display',sans-serif;font-weight:600}
+.o5 .wm em{font-style:normal;font-weight:500}
+.o5 .btn{font-family:'Switzer',sans-serif}
+
+/* 6 Big Shoulders poster */
+.o6 h2{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:44px;letter-spacing:.005em;text-transform:uppercase}
+.o6 .tag{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase}
+.o6 .wm{font-family:'Big Shoulders Display',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.03em}
+.o6 .wm em{font-style:normal}
+
+/* 7 Boska fashion serif */
+.o7 h2{font-family:'Boska',serif;font-weight:700;font-size:40px;letter-spacing:-.01em}
+.o7 .tag{font-family:'General Sans',sans-serif;font-weight:400;font-size:14px}
+.o7 .wm{font-family:'Boska',serif;font-weight:700}
+.o7 .btn{font-family:'General Sans',sans-serif}
+
+/* 8 Fragment Mono */
+.o8 h2{font-family:'Fragment Mono',monospace;font-weight:400;font-size:29px;letter-spacing:-.04em}
+.o8 .tag{font-family:'Fragment Mono',monospace;font-size:12.5px;letter-spacing:-.02em}
+.o8 .wm{font-family:'Fragment Mono',monospace;font-weight:400;letter-spacing:-.04em}
+.o8 .wm em{font-style:normal}
+
+/* 9 Young Serif */
+.o9 h2{font-family:'Young Serif',serif;font-weight:400;font-size:33px}
+.o9 .tag{font-family:'Instrument Sans',sans-serif;font-size:14px;font-weight:500}
+.o9 .wm{font-family:'Young Serif',serif;font-weight:400}
+
+/* 10 Zodiak */
+.o10 h2{font-family:'Zodiak',serif;font-weight:700;font-size:36px;letter-spacing:-.01em}
+.o10 .tag{font-family:'Zodiak',serif;font-style:italic;font-weight:400;font-size:16px}
+.o10 .wm{font-family:'Zodiak',serif;font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">pdfandme · type exploration · pick a number</div>
+  <h1 class="page">Ten headline voices.</h1>
+  <p class="lede">Same landing card, ten different typefaces for <b>"Edit your PDF."</b> and the tagline. The wordmark follows the headline's voice in each. UI text (buttons, labels) stays Instrument Sans unless noted. Tell me the number — mixing is fine too, e.g. "headline from 6, tagline from 2".</p>
+
+  <div class="grid">
+
+    <!-- 1 -->
+    <div class="option o1">
+      <div class="opt-head"><span class="num">1</span><span class="name">Fraunces</span><span class="vibe">current — warm literary serif</span></div>
+      <div class="stage"><div class="mock">
+        <div class="logo-row"><svg viewBox="0 0 24 24" fill="none"><path d="M6 2h8.5L20 7.5V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" fill="#A32035"/><path d="M14.5 2 20 7.5h-4.5a1 1 0 0 1-1-1V2Z" fill="#E08A96"/><circle cx="9.4" cy="13" r="1.3" fill="#fff"/><circle cx="14.6" cy="13" r="1.3" fill="#fff"/><path d="M9.2 16.4c.8.9 1.8 1.4 2.8 1.4s2-.5 2.8-1.4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg><span class="wm">pdf<em>and</em>me</span></div>
+        <h2>Edit your PDF.</h2>
+        <p class="tag">Better than Adobe. And actually free.</p>
+        <div class="cta"><button class="btn">↑&nbsp; Choose a file</button><span class="or">or drag and drop</span></div>
+      </div></div>
+      <div class="foot-note">The baseline. Comfortable, bookish. The italic tagline is what reads "AI-made" lately.</div>
+    </div>
+
+    <!-- 2 -->
+    <div class="option o2">
+      <div class="opt-head"><span class="num">2</span><span class="name">Gloock + Instrument Sans</span><span class="vibe">sharp editorial didone</span></div>
+      <div class="stage"><div class="mock">
+        <div class="logo-row"><svg viewBox="0 0 24 24" fill="none"><path d="M6 2h8.5L20 7.5V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" fill="#A32035"/><path d="M14.5 2 20 7.5h-4.5a1 1 0 0 1-1-1V2Z" fill="#E08A96"/><circle cx="9.4" cy="13" r="1.3" fill="#fff"/><circle cx="14.6" cy="13" r="1.3" fill="#fff"/><path d="M9.2 16.4c.8.9 1.8 1.4 2.8 1.4s2-.5 2.8-1.4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg><span class="wm" style="font-family:'Gloock',serif;font-weight:400">pdf<em style="font-style:normal">and</em>me</span></div>
+        <h2>Edit your PDF.</h2>
+        <p class="tag">Better than Adobe. And actually free.</p>
+        <div class="cta"><button class="btn">↑&nbsp; Choose a file</button><span class="or">or drag and drop</span></div>
+      </div></div>
+      <div class="foot-note">High-contrast newspaper masthead energy; tagline goes plain sans so the headline does the talking.</div>
+    </div>
+
+    <!-- 3 -->
+    <div class="option o3">
+      <div class="opt-head"><span class="num">3</span><span class="name">Instrument Serif</span><span class="vibe">lighter, refined, quieter</span></div>
+      <div class="stage"><div class="mock">
+        <div class="logo-row"><svg viewBox="0 0 24 24" fill="none"><path d="M6 2h8.5L20 7.5V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" fill="#A32035"/><path d="M14.5 2 20 7.5h-4.5a1 1 0 0 1-1-1V2Z" fill="#E08A96"/><circle cx="9.4" cy="13" r="1.3" fill="#fff"/><circle cx="14.6" cy="13" r="1.3" fill="#fff"/><path d="M9.2 16.4c.8.9 1.8 1.4 2.8 1.4s2-.5 2.8-1.4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg><span class="wm" style="font-family:'Instrument Serif',serif;font-weight:400">pdf<em>and</em>me</span></div>
+        <h2>Edit your PDF.</h2>
+        <p class="tag">Better than Adobe. And actually free.</p>
+        <div class="cta"><button class="btn">↑&nbsp; Choose a file</button><span class="or">or drag and drop</span></div>
+      </div></div>
+      <div class="foot-note">Same serif family as the UI font's sibling — thinner strokes, less "chunky display serif" than Fraunces.</div>
+    </div>
+
+    <!-- 4 -->
+    <div class="option o4">
+      <div class="opt-head"><span class="num">4</span><span class="name">Bricolage Grotesque</span><span class="vibe">playful zine, zero serif</span></div>
+      <div class="stage"><div class="mock">
+        <div class="logo-row"><svg viewBox="0 0 24 24" fill="none"><path d="M6 2h8.5L20 7.5V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" fill="#A32035"/><path d="M14.5 2 20 7.5h-4.5a1 1 0 0 1-1-1V2Z" fill="#E08A96"/><circle cx="9.4" cy="13" r="1.3" fill="#fff"/><circle cx="14.6" cy="13" r="1.3" fill="#fff"/><path d="M9.2 16.4c.8.9 1.8 1.4 2.8 1.4s2-.5 2.8-1.4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg><span class="wm">pdf<em>and</em>me</span></div>
+        <h2>Edit your PDF.</h2>
+        <p class="tag">Better than Adobe. And actually free.</p>
+        <div class="cta"><button class="btn">↑&nbsp; Choose a file</button><span class="or">or drag and drop</span></div>
+      </div></div>
+      <div class="foot-note">Quirky grotesque with hand-cut details — matches the smiley logo's personality best of the sans options.</div>
+    </div>
+
+    <!-- 5 -->
+    <div class="option o5">
+      <div class="opt-head"><span class="num">5</span><span class="name">Clash Display + Switzer</span><span class="vibe">confident modern product</span></div>
+      <div class="stage"><div class="mock">
+        <div class="logo-row"><svg viewBox="0 0 24 24" fill="none"><path d="M6 2h8.5L20 7.5V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" fill="#A32035"/><path d="M14.5 2 20 7.5h-4.5a1 1 0 0 1-1-1V2Z" fill="#E08A96"/><circle cx="9.4" cy="13" r="1.3" fill="#fff"/><circle cx="14.6" cy="13" r="1.3" fill="#fff"/><path d="M9.2 16.4c.8.9 1.8 1.4 2.8 1.4s2-.5 2.8-1.4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg><span class="wm">pdf<em>and</em>me</span></div>
+        <h2>Edit your PDF.</h2>
+        <p class="tag">Better than Adobe. And actually free.</p>
+        <div class="cta"><button class="btn">↑&nbsp; Choose a file</button><span class="or">or drag and drop</span></div>
+      </div></div>
+      <div class="foot-note">The "serious startup" cut — geometric, tight apertures. Whole UI would move to Switzer for coherence.</div>
+    </div>
+
+    <!-- 6 -->
+    <div class="option o6">
+      <div class="opt-head"><span class="num">6</span><span class="name">Big Shoulders + mono</span><span class="vibe">poster / print-shop utility</span></div>
+      <div class="stage"><div class="mock">
+        <div class="logo-row"><svg viewBox="0 0 24 24" fill="none"><path d="M6 2h8.5L20 7.5V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" fill="#A32035"/><path d="M14.5 2 20 7.5h-4.5a1 1 0 0 1-1-1V2Z" fill="#E08A96"/><circle cx="9.4" cy="13" r="1.3" fill="#fff"/><circle cx="14.6" cy="13" r="1.3" fill="#fff"/><path d="M9.2 16.4c.8.9 1.8 1.4 2.8 1.4s2-.5 2.8-1.4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg><span class="wm">pdfandme</span></div>
+        <h2>Edit your PDF.</h2>
+        <p class="tag">Better than Adobe. And actually free.</p>
+        <div class="cta"><button class="btn">↑&nbsp; Choose a file</button><span class="or">or drag and drop</span></div>
+      </div></div>
+      <div class="foot-note">Condensed uppercase + mono tagline: reads like a stamp on a manila envelope. Very un-AI, very "paperwork".</div>
+    </div>
+
+    <!-- 7 -->
+    <div class="option o7">
+      <div class="opt-head"><span class="num">7</span><span class="name">Boska + General Sans</span><span class="vibe">fashion-magazine drama</span></div>
+      <div class="stage"><div class="mock">
+        <div class="logo-row"><svg viewBox="0 0 24 24" fill="none"><path d="M6 2h8.5L20 7.5V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" fill="#A32035"/><path d="M14.5 2 20 7.5h-4.5a1 1 0 0 1-1-1V2Z" fill="#E08A96"/><circle cx="9.4" cy="13" r="1.3" fill="#fff"/><circle cx="14.6" cy="13" r="1.3" fill="#fff"/><path d="M9.2 16.4c.8.9 1.8 1.4 2.8 1.4s2-.5 2.8-1.4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg><span class="wm">pdf<em>and</em>me</span></div>
+        <h2>Edit your PDF.</h2>
+        <p class="tag">Better than Adobe. And actually free.</p>
+        <div class="cta"><button class="btn">↑&nbsp; Choose a file</button><span class="or">or drag and drop</span></div>
+      </div></div>
+      <div class="foot-note">Sharp wedge serifs, editorial attitude. The most "designed" feeling of the serif set.</div>
+    </div>
+
+    <!-- 8 -->
+    <div class="option o8">
+      <div class="opt-head"><span class="num">8</span><span class="name">Fragment Mono</span><span class="vibe">honest tool, hacker minimal</span></div>
+      <div class="stage"><div class="mock">
+        <div class="logo-row"><svg viewBox="0 0 24 24" fill="none"><path d="M6 2h8.5L20 7.5V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" fill="#A32035"/><path d="M14.5 2 20 7.5h-4.5a1 1 0 0 1-1-1V2Z" fill="#E08A96"/><circle cx="9.4" cy="13" r="1.3" fill="#fff"/><circle cx="14.6" cy="13" r="1.3" fill="#fff"/><path d="M9.2 16.4c.8.9 1.8 1.4 2.8 1.4s2-.5 2.8-1.4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg><span class="wm">pdf<em>and</em>me</span></div>
+        <h2>Edit your PDF.</h2>
+        <p class="tag">Better than Adobe. And actually free.</p>
+        <div class="cta"><button class="btn">↑&nbsp; Choose a file</button><span class="or">or drag and drop</span></div>
+      </div></div>
+      <div class="foot-note">Monospace everything — pairs with the privacy story ("just a tool, no tricks"). Least corporate option here.</div>
+    </div>
+
+    <!-- 9 -->
+    <div class="option o9">
+      <div class="opt-head"><span class="num">9</span><span class="name">Young Serif</span><span class="vibe">chunky retro warmth</span></div>
+      <div class="stage"><div class="mock">
+        <div class="logo-row"><svg viewBox="0 0 24 24" fill="none"><path d="M6 2h8.5L20 7.5V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" fill="#A32035"/><path d="M14.5 2 20 7.5h-4.5a1 1 0 0 1-1-1V2Z" fill="#E08A96"/><circle cx="9.4" cy="13" r="1.3" fill="#fff"/><circle cx="14.6" cy="13" r="1.3" fill="#fff"/><path d="M9.2 16.4c.8.9 1.8 1.4 2.8 1.4s2-.5 2.8-1.4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg><span class="wm">pdf<em style="font-style:normal;color:var(--red)">and</em>me</span></div>
+        <h2>Edit your PDF.</h2>
+        <p class="tag">Better than Adobe. And actually free.</p>
+        <div class="cta"><button class="btn">↑&nbsp; Choose a file</button><span class="or">or drag and drop</span></div>
+      </div></div>
+      <div class="foot-note">Soft old-style serif with weight — friendly like the logo, none of the didone gloss. Cookbook energy.</div>
+    </div>
+
+    <!-- 10 -->
+    <div class="option o10">
+      <div class="opt-head"><span class="num">10</span><span class="name">Zodiak</span><span class="vibe">bookish with bite</span></div>
+      <div class="stage"><div class="mock">
+        <div class="logo-row"><svg viewBox="0 0 24 24" fill="none"><path d="M6 2h8.5L20 7.5V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" fill="#A32035"/><path d="M14.5 2 20 7.5h-4.5a1 1 0 0 1-1-1V2Z" fill="#E08A96"/><circle cx="9.4" cy="13" r="1.3" fill="#fff"/><circle cx="14.6" cy="13" r="1.3" fill="#fff"/><path d="M9.2 16.4c.8.9 1.8 1.4 2.8 1.4s2-.5 2.8-1.4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg><span class="wm">pdf<em style="font-style:italic;font-weight:400;color:var(--red)">and</em>me</span></div>
+        <h2>Edit your PDF.</h2>
+        <p class="tag">Better than Adobe. And actually free.</p>
+        <div class="cta"><button class="btn">↑&nbsp; Choose a file</button><span class="or">or drag and drop</span></div>
+      </div></div>
+      <div class="foot-note">A heavier, moodier serif than Fraunces — keeps the italic tagline but with more edge.</div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

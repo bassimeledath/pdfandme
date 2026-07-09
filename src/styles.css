@@ -12,7 +12,7 @@
   --red-deep: #7e1827;
   --red-soft: rgba(163, 32, 53, 0.07);
   --yellow: #ffe45e;
-  --serif: 'Fraunces', Georgia, serif;
+  --serif: 'Young Serif', Georgia, serif;
   --sans: 'Instrument Sans', -apple-system, sans-serif;
   --mono: 'Spline Sans Mono', monospace;
 }
@@ -48,13 +48,13 @@ button { font-family: var(--sans); cursor: pointer; }
 }
 .start .logo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 34px; }
 .start .logo-row svg { width: 28px; height: 28px; }
-.wordmark { font-family: var(--serif); font-weight: 600; font-size: 20px; letter-spacing: -0.01em; color: var(--ink); }
-.wordmark em { font-style: italic; font-weight: 500; color: var(--red); }
+.wordmark { font-family: var(--serif); font-weight: 400; font-size: 19px; letter-spacing: -0.01em; color: var(--ink); }
+.wordmark em { font-style: normal; color: var(--red); }
 .start h1 {
-  font-family: var(--serif); font-weight: 500; font-size: clamp(38px, 6vw, 54px);
-  letter-spacing: -0.02em; line-height: 1.05; font-variation-settings: 'opsz' 144;
+  font-family: var(--serif); font-weight: 400; font-size: clamp(36px, 5.6vw, 50px);
+  letter-spacing: -0.01em; line-height: 1.08;
 }
-.start .tagline { margin-top: 14px; font-family: var(--serif); font-style: italic; font-size: 20px; color: var(--red); }
+.start .tagline { margin-top: 14px; font-family: var(--sans); font-weight: 500; font-size: 16.5px; color: var(--red); }
 .start .error { margin-top: 16px; color: var(--red); font-weight: 500; font-size: 14px; }
 .cta-row { margin-top: 36px; display: flex; align-items: center; gap: 16px; }
 .btn-primary {
@@ -92,7 +92,7 @@ button { font-family: var(--sans); cursor: pointer; }
   82% { stroke-dashoffset: 0; opacity: 1; }
   100% { stroke-dashoffset: 0; opacity: 0; }
 }
-.loading .quip { margin-top: 34px; font-family: var(--serif); font-style: italic; font-size: 23px; min-height: 34px; transition: opacity 0.4s; }
+.loading .quip { margin-top: 34px; font-family: var(--serif); font-size: 21px; min-height: 34px; transition: opacity 0.4s; }
 .loading .meta { margin-top: 14px; }
 .loading .bar { width: 180px; height: 2px; background: var(--line); margin-top: 18px; border-radius: 2px; overflow: hidden; }
 .loading .bar i { display: block; height: 100%; background: var(--ink); border-radius: 2px; animation: grow 3s ease-out infinite; }
@@ -326,7 +326,7 @@ button { font-family: var(--sans); cursor: pointer; }
   border-radius: 18px; box-shadow: 0 30px 70px -20px rgba(33, 30, 25, 0.5); padding: 22px;
   animation: toastIn 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2);
 }
-.sig-modal h4 { font-family: var(--serif); font-weight: 500; font-size: 19px; margin-bottom: 14px; }
+.sig-modal h4 { font-family: var(--serif); font-weight: 400; font-size: 18px; margin-bottom: 14px; }
 .sig-pad {
   border: 1.5px dashed var(--line-strong); border-radius: 12px; height: 160px; position: relative;
   background: #fdfcf9; touch-action: none; cursor: crosshair; overflow: hidden;
