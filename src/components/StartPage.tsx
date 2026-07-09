@@ -1,12 +1,28 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useStore } from '../store'
-import { IcLock, IcUpload, Logo } from './icons'
+import { SavedSession, clearSession, loadSession } from '../persist'
+import { IcClose, IcLock, IcUpload, Logo } from './icons'
+
+function timeAgo(ts: number): string {
+  const m = Math.round((Date.now() - ts) / 60000)
+  if (m < 1) return 'just now'
+  if (m < 60) return `${m} min ago`
+  const h = Math.round(m / 60)
+  if (h < 24) return `${h} hour${h === 1 ? '' : 's'} ago`
+  return `${Math.round(h / 24)} day${h < 48 ? '' : 's'} ago`
+}
 
 export default function StartPage() {
   const openFile = useStore((s) => s.openFile)
+  const resumeSession = useStore((s) => s.resumeSession)
   const loadError = useStore((s) => s.loadError)
   const [over, setOver] = useState(false)
+  const [saved, setSaved] = useState<SavedSession | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    void loadSession().then(setSaved)
+  }, [])
 
   const handleFiles = useCallback(
     (files: FileList | null) => {
@@ -61,6 +77,28 @@ export default function StartPage() {
           onChange={(e) => handleFiles(e.target.files)}
         />
       </div>
+      {saved && (
+        <div className="resume-card">
+          <Logo s={18} />
+          <button className="resume-main" onClick={() => void resumeSession(saved)}>
+            <b>Resume {saved.fileName}</b>
+            <span>
+              {saved.anns.length > 0 && `${saved.anns.length} edit${saved.anns.length === 1 ? '' : 's'} · `}
+              saved {timeAgo(saved.savedAt)}
+            </span>
+          </button>
+          <button
+            className="resume-x"
+            title="Discard saved session"
+            onClick={() => {
+              void clearSession()
+              setSaved(null)
+            }}
+          >
+            <IcClose />
+          </button>
+        </div>
+      )}
       <div className="foot">
         <span className="lock">
           <IcLock />

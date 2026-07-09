@@ -229,6 +229,12 @@ function drawTextAnn(page: PDFPage, meta: PageMeta, ann: TextAnn, font: PDFFont)
   const rot = totalRot(meta)
   const lines = wrapText(ann.text, font, size, ann.w - 8)
 
+  if (ann.bg) {
+    // edit-text replacement: white out the original run under the box
+    const b = boxToPdf(meta, ann.x, ann.y, ann.w, ann.h)
+    page.drawRectangle({ ...b, width: b.w, height: b.h, color: rgb(1, 1, 1) })
+  }
+
   lines.forEach((line, i) => {
     // position of this line's baseline-ish top-left in display space
     const lx = ann.x + 4

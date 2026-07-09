@@ -74,6 +74,19 @@ button { font-family: var(--sans); cursor: pointer; }
 .start .foot .lock svg { width: 13px; height: 13px; }
 .gh-link { text-decoration: none; }
 .gh-link:hover { color: var(--ink); }
+.resume-card {
+  margin-top: 18px; display: flex; align-items: center; gap: 12px;
+  background: var(--white); border: 1px solid var(--line-strong); border-radius: 14px;
+  padding: 10px 12px 10px 16px; box-shadow: 0 14px 34px -18px rgba(33, 30, 25, 0.3);
+  animation: toastIn 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+.resume-main { border: none; background: none; text-align: left; padding: 4px 6px; border-radius: 8px; }
+.resume-main:hover b { text-decoration: underline; text-underline-offset: 3px; }
+.resume-main b { display: block; font-size: 13.5px; font-weight: 600; color: var(--ink); max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.resume-main span { font-size: 12px; color: var(--ink-2); }
+.resume-x { border: none; background: none; color: var(--ink-3); padding: 6px; border-radius: 8px; }
+.resume-x:hover { color: var(--ink); background: var(--paper); }
+.resume-x svg { width: 13px; height: 13px; }
 
 /* ============ loading ============ */
 .loading {
@@ -230,6 +243,14 @@ button { font-family: var(--sans); cursor: pointer; }
 .overlay.tool-text, .overlay.tool-check, .overlay.tool-cross, .overlay.tool-date, .overlay.tool-sign, .overlay.tool-image { cursor: crosshair; }
 .overlay.tool-highlight, .overlay.tool-whiteout { cursor: crosshair; }
 .overlay.tool-draw { cursor: crosshair; }
+
+/* editable text runs */
+.overlay.tool-edittext { cursor: text; }
+.text-run {
+  position: absolute; z-index: 4; cursor: text; border-radius: 2px;
+  outline: 1.5px dashed transparent; transition: outline-color 0.12s, background 0.12s;
+}
+.text-run:hover { outline-color: var(--red); background: rgba(163, 32, 53, 0.06); }
 
 /* annotations */
 .ann { position: absolute; }

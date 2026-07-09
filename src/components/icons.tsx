@@ -20,6 +20,13 @@ const I = ({ d, s = 18, sw = 1.8 }: { d: string; s?: number; sw?: number }) => (
 
 export const IcSelect = () => <I d="M5 3l14 8-6.5 1.5L9 19 5 3z" />
 export const IcText = () => <I d="M5 5h14M12 5v14" />
+export const IcEditText = () => (
+  <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 5h11M9.5 5v10" />
+    <path d="M19.5 8.5a1.9 1.9 0 0 1 2.7 2.7L15 18.4l-3.4.7.7-3.4 7.2-7.2z" />
+    <path d="M4 21h16" />
+  </svg>
+)
 export const IcSign = () => <I d="M3 17c2-6 4-8 5-6s0 7 2 5 3-9 5-7-1 8 1 7 3-4 5-3" />
 export const IcHighlight = () => <I d="M9 15 4 20M14 4l6 6-8 8-6-6 8-8zM4 20h5" />
 export const IcDraw = () => <I d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />

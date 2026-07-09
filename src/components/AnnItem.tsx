@@ -258,7 +258,11 @@ function TextBody({ ann, zoom }: { ann: TextAnn; zoom: number }) {
   }
 
   return (
-    <div className="body" title={editing ? undefined : 'Drag to move — double-click to edit'}>
+    <div
+      className="body"
+      title={editing ? undefined : 'Drag to move — double-click to edit'}
+      style={ann.bg ? { background: '#fff' } : undefined}
+    >
       <textarea
         ref={ref}
         value={ann.text}

@@ -2,7 +2,7 @@ import { memo, useEffect, useRef, useState } from 'react'
 import { newId, useStore } from '../store'
 import { PageMeta, Pt, displaySize } from '../types'
 import { rectToDisplay } from '../pdf/coords'
-import { renderPage } from '../pdf/pdfjs'
+import { TextRun, getTextRuns, renderPage } from '../pdf/pdfjs'
 import { tryCapture } from '../utils'
 import AnnItem from './AnnItem'
 import { IcCheck } from './icons'
@@ -37,6 +37,25 @@ function PageView({ meta, ord, onRequestImage }: Props) {
   } | null>(null)
   const [rectPrev, setRectPrev] = useState<{ x: number; y: number; w: number; h: number } | null>(null)
   const [inkPrev, setInkPrev] = useState<Pt[] | null>(null)
+  const [textRuns, setTextRuns] = useState<TextRun[] | null>(null)
+  const runsRotRef = useRef<number>(-1)
+
+  // load editable text runs when the edit-text tool is active
+  useEffect(() => {
+    if (tool !== 'edittext' || !pdf) return
+    if (textRuns && runsRotRef.current === meta.extraRot) return
+    let cancelled = false
+    getTextRuns(pdf, meta)
+      .then((runs) => {
+        if (cancelled) return
+        runsRotRef.current = meta.extraRot
+        setTextRuns(runs)
+      })
+      .catch(() => setTextRuns([]))
+    return () => {
+      cancelled = true
+    }
+  }, [tool, pdf, meta.extraRot]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const { w, h } = displaySize(meta)
   const cssW = Math.floor(w * zoom)
@@ -81,6 +100,10 @@ function PageView({ meta, ord, onRequestImage }: Props) {
     switch (tool) {
       case 'select':
         if (e.target === overlayRef.current) s.select(null)
+        return
+      case 'edittext':
+        // clicking empty page exits edit-text mode
+        if (e.target === overlayRef.current) s.setTool('select')
         return
       case 'text': {
         // prevent the click's default focus-steal from blurring (and thus
@@ -311,6 +334,44 @@ function PageView({ meta, ord, onRequestImage }: Props) {
             </div>
           )
         })}
+
+        {/* editable text runs (edit-text tool) */}
+        {tool === 'edittext' &&
+          textRuns?.map((run, i) => (
+            <div
+              key={i}
+              className="text-run"
+              style={{
+                left: (run.x - 2) * zoom,
+                top: (run.y - 2) * zoom,
+                width: (run.w + 4) * zoom,
+                height: (run.h + 4) * zoom,
+              }}
+              title="Click to edit this text"
+              onPointerDown={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                const s = store.getState()
+                const id = newId()
+                s.addAnn({
+                  id,
+                  type: 'text',
+                  page: meta.src,
+                  x: run.x - 3,
+                  y: run.y - 3,
+                  w: Math.max(run.w + 24, 60),
+                  h: run.h + 6,
+                  text: run.str,
+                  size: Math.max(6, Math.round(run.size * 0.92 * 2) / 2),
+                  color: INK,
+                  bg: true,
+                })
+                s.setTool('select')
+                s.select(id)
+                s.setEditing(id)
+              }}
+            />
+          ))}
 
         {/* annotations */}
         {pageAnns.map((a) => (

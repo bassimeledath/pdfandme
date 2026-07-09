@@ -3,6 +3,7 @@ import type { PDFDocumentProxy } from 'pdfjs-dist'
 import { Ann, FormFieldMeta, PageMeta, SavedSignature, Tool, displaySize } from './types'
 import { rotateBox90 } from './pdf/coords'
 import { loadPdf } from './pdf/pdfjs'
+import { SavedSession, clearSession, saveSession } from './persist'
 
 export type Phase = 'start' | 'loading' | 'edit'
 
@@ -62,6 +63,7 @@ interface State {
   future: Snapshot[]
 
   openFile: (file: File) => Promise<void>
+  resumeSession: (saved: SavedSession) => Promise<void>
   reset: () => void
   setPhase: (p: Phase) => void
   setTool: (t: Tool) => void
@@ -150,7 +152,36 @@ export const useStore = create<State>((set, get) => ({
     }
   },
 
-  reset: () =>
+  resumeSession: async (saved: SavedSession) => {
+    set({ phase: 'loading', fileName: saved.fileName, loadError: null })
+    const started = Date.now()
+    try {
+      const { doc, fields } = await loadPdf(saved.bytes)
+      const remaining = Math.max(0, 1200 - (Date.now() - started))
+      await new Promise((r) => setTimeout(r, remaining))
+      set({
+        bytes: saved.bytes,
+        pdf: doc,
+        pages: saved.pages,
+        fields,
+        formValues: saved.formValues,
+        anns: saved.anns,
+        past: [],
+        future: [],
+        selected: null,
+        editing: null,
+        tool: 'select',
+        toastDismissed: true,
+        phase: 'edit',
+      })
+    } catch {
+      void clearSession()
+      set({ phase: 'start', loadError: "Couldn't restore your last session." })
+    }
+  },
+
+  reset: () => {
+    void clearSession()
     set({
       phase: 'start',
       fileName: '',
@@ -163,8 +194,10 @@ export const useStore = create<State>((set, get) => ({
       past: [],
       future: [],
       selected: null,
+      editing: null,
       loadError: null,
-    }),
+    })
+  },
 
   setPhase: (phase) => set({ phase }),
   setTool: (tool) => set({ tool, selected: null, editing: null }),
@@ -282,6 +315,27 @@ export const useStore = create<State>((set, get) => ({
     })
   },
 }))
+
+// auto-save edits for crash/refresh recovery (debounced; only when dirty)
+let saveTimer: ReturnType<typeof setTimeout> | undefined
+useStore.subscribe((s) => {
+  if (s.phase !== 'edit' || !s.bytes) return
+  const dirty =
+    s.anns.length > 0 ||
+    Object.keys(s.formValues).length > 0 ||
+    s.pages.some((p, i) => p.deleted || p.extraRot !== 0 || p.src !== i)
+  if (!dirty) return
+  clearTimeout(saveTimer)
+  const snap = {
+    fileName: s.fileName,
+    bytes: s.bytes,
+    pages: s.pages,
+    anns: s.anns,
+    formValues: s.formValues,
+    savedAt: Date.now(),
+  }
+  saveTimer = setTimeout(() => void saveSession(snap), 800)
+})
 
 // dev-only handle for driving the app in automated tests
 if (import.meta.env.DEV) {
