@@ -6,7 +6,6 @@ import {
   IcCross,
   IcDate,
   IcDraw,
-  IcEditText,
   IcHighlight,
   IcImage,
   IcMore,
@@ -18,8 +17,7 @@ import {
 } from './icons'
 
 const MAIN: { tool: Tool; label: string; icon: () => JSX.Element }[] = [
-  { tool: 'select', label: 'Select', icon: IcSelect },
-  { tool: 'edittext', label: 'Edit text', icon: IcEditText },
+  { tool: 'select', label: 'Select — click any text to edit it', icon: IcSelect },
   { tool: 'text', label: 'Add text', icon: IcText },
   { tool: 'sign', label: 'Sign', icon: IcSign },
   { tool: 'highlight', label: 'Highlight', icon: IcHighlight },

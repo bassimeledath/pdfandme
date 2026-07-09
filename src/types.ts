@@ -1,6 +1,5 @@
 export type Tool =
   | 'select'
-  | 'edittext'
   | 'text'
   | 'sign'
   | 'highlight'
@@ -29,8 +28,10 @@ export interface TextAnn extends AnnBase {
   text: string
   size: number
   color: string
-  /** Opaque white background — used by "edit text" to cover the original run. */
+  /** Opaque white background — used by click-to-edit to cover the original run. */
   bg?: boolean
+  /** The original run's text (click-to-edit) — unchanged boxes revert on deselect. */
+  orig?: string
 }
 export interface RectAnn extends AnnBase {
   type: 'highlight' | 'whiteout'

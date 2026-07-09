@@ -244,13 +244,12 @@ button { font-family: var(--sans); cursor: pointer; }
 .overlay.tool-highlight, .overlay.tool-whiteout { cursor: crosshair; }
 .overlay.tool-draw { cursor: crosshair; }
 
-/* editable text runs */
-.overlay.tool-edittext { cursor: text; }
+/* click-to-edit text runs (select mode) */
 .text-run {
-  position: absolute; z-index: 4; cursor: text; border-radius: 2px;
+  position: absolute; z-index: 2; cursor: text; border-radius: 2px;
   outline: 1.5px dashed transparent; transition: outline-color 0.12s, background 0.12s;
 }
-.text-run:hover { outline-color: var(--red); background: rgba(163, 32, 53, 0.06); }
+.text-run:hover { outline-color: rgba(163, 32, 53, 0.65); background: rgba(163, 32, 53, 0.05); }
 
 /* annotations */
 .ann { position: absolute; }

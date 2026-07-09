@@ -40,9 +40,9 @@ function PageView({ meta, ord, onRequestImage }: Props) {
   const [textRuns, setTextRuns] = useState<TextRun[] | null>(null)
   const runsRotRef = useRef<number>(-1)
 
-  // load editable text runs when the edit-text tool is active
+  // editable text runs power click-to-edit in select mode
   useEffect(() => {
-    if (tool !== 'edittext' || !pdf) return
+    if (tool !== 'select' || !pdf) return
     if (textRuns && runsRotRef.current === meta.extraRot) return
     let cancelled = false
     getTextRuns(pdf, meta)
@@ -100,10 +100,6 @@ function PageView({ meta, ord, onRequestImage }: Props) {
     switch (tool) {
       case 'select':
         if (e.target === overlayRef.current) s.select(null)
-        return
-      case 'edittext':
-        // clicking empty page exits edit-text mode
-        if (e.target === overlayRef.current) s.setTool('select')
         return
       case 'text': {
         // prevent the click's default focus-steal from blurring (and thus
@@ -335,8 +331,8 @@ function PageView({ meta, ord, onRequestImage }: Props) {
           )
         })}
 
-        {/* editable text runs (edit-text tool) */}
-        {tool === 'edittext' &&
+        {/* click-to-edit targets over the document's own text (select mode) */}
+        {tool === 'select' &&
           textRuns?.map((run, i) => (
             <div
               key={i}
@@ -365,8 +361,8 @@ function PageView({ meta, ord, onRequestImage }: Props) {
                   size: Math.max(6, Math.round(run.size * 0.92 * 2) / 2),
                   color: INK,
                   bg: true,
+                  orig: run.str,
                 })
-                s.setTool('select')
                 s.select(id)
                 s.setEditing(id)
               }}

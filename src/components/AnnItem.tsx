@@ -282,7 +282,17 @@ function TextBody({ ann, zoom }: { ann: TextAnn; zoom: number }) {
         }}
         onBlur={() => {
           store.getState().setEditing(null)
-          if (ann.text.trim() === '') store.getState().removeAnn(ann.id)
+          // deferred so clicks on the context bar (which re-select) don't
+          // count as leaving the annotation
+          setTimeout(() => {
+            const st = store.getState()
+            const cur = st.anns.find((a) => a.id === ann.id)
+            if (!cur || cur.type !== 'text') return
+            if (st.selected === cur.id || st.editing === cur.id) return
+            const untouchedEdit =
+              cur.bg && cur.orig !== undefined && cur.text === cur.orig
+            if (cur.text.trim() === '' || untouchedEdit) st.removeAnn(cur.id)
+          }, 180)
         }}
       />
     </div>
