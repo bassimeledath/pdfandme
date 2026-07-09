@@ -32,45 +32,48 @@ button { font-family: var(--sans); cursor: pointer; }
 /* ============ start page ============ */
 .start {
   position: fixed; inset: 0; background: var(--paper);
-  display: flex; flex-direction: column;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  overflow: hidden;
 }
-.start .dropzone {
-  position: absolute; inset: 22px; border: 1.5px dashed rgba(33, 30, 25, 0.28); border-radius: 18px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
-  transition: border-color 0.25s, background 0.25s; padding: 24px; overflow: hidden;
+.start .dropcard {
+  width: min(600px, calc(100vw - 48px));
+  border: 1.5px dashed rgba(33, 30, 25, 0.3); border-radius: 20px;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  padding: 60px 44px 56px; position: relative; background: rgba(255, 255, 255, 0.35);
+  transition: border-color 0.25s, background 0.25s, transform 0.25s;
 }
-.start .dropzone.over { border-color: var(--red); background: var(--red-soft); }
+.start .dropcard.over { border-color: var(--red); background: var(--red-soft); transform: scale(1.015); }
 .start .watermark {
   position: absolute; right: -70px; bottom: -90px; width: 420px; opacity: 0.045; pointer-events: none;
 }
-.start .logo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 42px; }
+.start .logo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 34px; }
 .start .logo-row svg { width: 28px; height: 28px; }
 .wordmark { font-family: var(--serif); font-weight: 600; font-size: 20px; letter-spacing: -0.01em; color: var(--ink); }
 .wordmark em { font-style: italic; font-weight: 500; color: var(--red); }
 .start h1 {
-  font-family: var(--serif); font-weight: 500; font-size: clamp(42px, 7vw, 64px);
-  letter-spacing: -0.02em; line-height: 1.02; font-variation-settings: 'opsz' 144;
+  font-family: var(--serif); font-weight: 500; font-size: clamp(38px, 6vw, 54px);
+  letter-spacing: -0.02em; line-height: 1.05; font-variation-settings: 'opsz' 144;
 }
-.start h1 em { font-style: italic; font-weight: 400; }
-.start .tagline { margin-top: 16px; font-family: var(--serif); font-style: italic; font-size: 21px; color: var(--red); }
-.start .sub { margin-top: 14px; font-size: 16px; color: var(--ink-2); max-width: 46ch; line-height: 1.55; }
-.start .sub b { color: var(--ink); font-weight: 500; }
-.start .error { margin-top: 18px; color: var(--red); font-weight: 500; font-size: 14px; }
+.start .tagline { margin-top: 14px; font-family: var(--serif); font-style: italic; font-size: 20px; color: var(--red); }
+.start .error { margin-top: 16px; color: var(--red); font-weight: 500; font-size: 14px; }
+.cta-row { margin-top: 36px; display: flex; align-items: center; gap: 16px; }
 .btn-primary {
-  margin-top: 34px; display: inline-flex; align-items: center; gap: 10px;
+  display: inline-flex; align-items: center; gap: 10px;
   background: var(--red); color: #fff; border: none; border-radius: 99px;
   font-weight: 500; font-size: 15.5px; padding: 14px 30px;
   box-shadow: 0 8px 20px -8px rgba(163, 32, 53, 0.5); transition: background 0.2s, transform 0.2s;
 }
 .btn-primary:hover { background: var(--red-deep); transform: translateY(-1px); }
-.start .fineprint { margin-top: 22px; }
+.or-drop { font-size: 13.5px; color: var(--ink-3); }
 .start .foot {
   position: absolute; left: 46px; right: 46px; bottom: 42px;
   display: flex; justify-content: space-between; align-items: center;
-  font-size: 13px; color: var(--ink-2); pointer-events: none;
+  font-size: 13px; color: var(--ink-2);
 }
 .start .foot .lock { display: inline-flex; align-items: center; gap: 7px; }
 .start .foot .lock svg { width: 13px; height: 13px; }
+.gh-link { text-decoration: none; }
+.gh-link:hover { color: var(--ink); }
 
 /* ============ loading ============ */
 .loading {
@@ -106,8 +109,6 @@ button { font-family: var(--sans); cursor: pointer; }
 .topbar .fname { font-size: 14px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 280px; }
 .topbar .fname .ext { color: var(--ink-3); font-weight: 400; }
 .topbar .spacer { flex: 1; }
-.topbar .privacy { font-size: 12.5px; color: var(--ink-3); display: none; }
-@media (min-width: 900px) { .topbar .privacy { display: block; } }
 .ghost-btn {
   width: 34px; height: 34px; border-radius: 9px; border: none; background: none; color: var(--ink-2);
   display: inline-flex; align-items: center; justify-content: center; transition: background 0.15s;

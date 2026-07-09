@@ -164,7 +164,6 @@ export default function Editor() {
           <span className="ext">.pdf</span>
         </span>
         <div className="spacer" />
-        <span className="privacy">Everything happens in this tab — nothing is uploaded.</span>
         <button className="ghost-btn" title="Undo (⌘Z)" disabled={s.past.length === 0} onClick={s.undo}>
           <IcUndo />
         </button>
