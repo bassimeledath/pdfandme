@@ -9,6 +9,29 @@ export default function PagesRail() {
   const store = useStore
   const [dragIdx, setDragIdx] = useState<number | null>(null)
   const [overIdx, setOverIdx] = useState<number | null>(null)
+  const [merging, setMerging] = useState(false)
+  const [mergeErr, setMergeErr] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  // the "Merge another PDF" entry in the More drawer opens the rail and
+  // fires this event to pop the picker right away
+  useEffect(() => {
+    const pick = () => fileRef.current?.click()
+    window.addEventListener('pdfandme:pick-merge', pick)
+    return () => window.removeEventListener('pdfandme:pick-merge', pick)
+  }, [])
+
+  const onPick = async (file: File | null) => {
+    if (!file || merging) return
+    setMergeErr(null)
+    setMerging(true)
+    const err = await store.getState().appendPdf(file)
+    setMerging(false)
+    if (err) {
+      setMergeErr(err)
+      setTimeout(() => setMergeErr(null), 6000)
+    }
+  }
 
   const live = pages
     .map((p, idx) => ({ p, idx }))
@@ -43,6 +66,26 @@ export default function PagesRail() {
           }}
         />
       ))}
+      <button
+        className="add-pdf"
+        disabled={merging}
+        onClick={() => fileRef.current?.click()}
+        title="Append another PDF's pages to this document"
+      >
+        {merging ? 'Merging…' : '+ Add PDF'}
+      </button>
+      {mergeErr && <p className="merge-err">{mergeErr}</p>}
+      <input
+        ref={fileRef}
+        type="file"
+        accept="application/pdf"
+        style={{ display: 'none' }}
+        onChange={(e) => {
+          const f = e.target.files?.[0] ?? null
+          e.target.value = ''
+          void onPick(f)
+        }}
+      />
     </div>
   )
 }

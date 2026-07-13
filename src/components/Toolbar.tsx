@@ -13,6 +13,7 @@ import {
   IcSelect,
   IcSign,
   IcText,
+  IcUpload,
   IcWhiteout,
 } from './icons'
 
@@ -103,6 +104,18 @@ export default function Toolbar() {
             >
               <IcPages />
               Pages
+            </button>
+            <button
+              className="pop-item"
+              onClick={() => {
+                setRailOpen(true)
+                setMoreOpen(false)
+                // let the rail mount before popping its file picker
+                setTimeout(() => window.dispatchEvent(new CustomEvent('pdfandme:pick-merge')), 60)
+              }}
+            >
+              <IcUpload />
+              Merge another PDF
             </button>
             <button
               className="pop-item"

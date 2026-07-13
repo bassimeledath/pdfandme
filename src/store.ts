@@ -1,8 +1,10 @@
 import { create } from 'zustand'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
+import { PDFDocument } from 'pdf-lib'
 import { Ann, FormFieldMeta, PageMeta, SavedSignature, Tool, displaySize } from './types'
 import { rotateBox90 } from './pdf/coords'
 import { loadPdf } from './pdf/pdfjs'
+import { stripWidgetAnnots } from './pdf/export'
 import { SavedSession, clearSession, saveSession } from './persist'
 
 export type Phase = 'start' | 'loading' | 'edit'
@@ -70,6 +72,8 @@ interface State {
 
   openFile: (file: File) => Promise<void>
   resumeSession: (saved: SavedSession) => Promise<void>
+  /** Append another PDF's pages. Returns an error message, or null on success. */
+  appendPdf: (file: File) => Promise<string | null>
   reset: () => void
   setPhase: (p: Phase) => void
   setTool: (t: Tool) => void
@@ -183,6 +187,70 @@ export const useStore = create<State>((set, get) => ({
     } catch {
       void clearSession()
       set({ phase: 'start', loadError: "Couldn't restore your last session." })
+    }
+  },
+
+  appendPdf: async (file: File) => {
+    const s = get()
+    if (!s.bytes || s.phase !== 'edit') return 'Open a PDF first.'
+    try {
+      const incomingBytes = await file.arrayBuffer()
+      const cur = await PDFDocument.load(s.bytes, { ignoreEncryption: true })
+      const incoming = await PDFDocument.load(incomingBytes, { ignoreEncryption: true })
+      // saving an encrypted doc produces broken output (pdf-lib doesn't
+      // decrypt streams) — and here it would poison the live session bytes
+      if (cur.isEncrypted) return "This document is protected — merging isn't available for it."
+      if (incoming.isEncrypted) return 'That PDF is password-protected. Remove the password and try again.'
+
+      // flatten the incoming form so its values stay visible and its widgets
+      // don't arrive as phantom, unfillable fields
+      try {
+        incoming.getForm().flatten()
+      } catch {
+        try {
+          incoming.getForm().flatten({ updateFieldAppearances: false })
+        } catch {
+          stripWidgetAnnots(incoming)
+        }
+      }
+
+      const copied = await cur.copyPages(incoming, incoming.getPageIndices())
+      copied.forEach((p) => cur.addPage(p))
+      const merged = await cur.save({ updateFieldAppearances: false })
+      const mergedBytes = merged.buffer as ArrayBuffer
+
+      // commit only after the merged bytes round-trip through pdf.js —
+      // pdf-lib's parser is stricter, and old state must survive a failure
+      const { doc, pages: freshPages, fields } = await loadPdf(mergedBytes)
+      const prev = get()
+      const oldPdf = prev.pdf
+      // appending never changes src indices, so existing metas (rotation,
+      // deletion, order) are kept as-is; fresh metas cover the new pages
+      const pages = [...prev.pages, ...freshPages.slice(prev.pages.length)]
+      set({
+        bytes: mergedBytes,
+        pdf: doc,
+        pages,
+        fields,
+        past: [], // undo across a merge would desync pages from the new bytes
+        future: [],
+        selected: null,
+        editing: null,
+      })
+      void oldPdf?.destroy()
+      // the autosave dirty-heuristic won't notice a merge with no other edits
+      void saveSession({
+        fileName: prev.fileName,
+        bytes: mergedBytes,
+        pages,
+        anns: prev.anns,
+        formValues: prev.formValues,
+        savedAt: Date.now(),
+      })
+      return null
+    } catch (e) {
+      console.error('merge failed', e)
+      return "Couldn't read that file as a PDF."
     }
   },
 

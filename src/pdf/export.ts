@@ -143,6 +143,33 @@ async function redactPages(
   return out.save()
 }
 
+/**
+ * Remove all Widget (form field) annotations from every page. Merge fallback:
+ * when an incoming doc's form can't be flattened, copied widgets would show
+ * as phantom, unfillable fields — dropping them is the lesser evil.
+ */
+export function stripWidgetAnnots(doc: PDFDocument) {
+  for (const page of doc.getPages()) {
+    const annots = page.node.Annots()
+    if (!annots) continue
+    const keep: PDFObject[] = []
+    for (let i = 0; i < annots.size(); i++) {
+      const el = annots.get(i)
+      let widget = true // unparseable entries are dropped
+      try {
+        const dict = doc.context.lookupMaybe(el, PDFDict)
+        widget = dict?.get(PDFName.of('Subtype')) === PDFName.of('Widget')
+      } catch {
+        /* keep widget = true */
+      }
+      if (!widget) keep.push(el)
+    }
+    if (keep.length === annots.size()) continue
+    if (keep.length) page.node.set(PDFName.of('Annots'), doc.context.obj(keep))
+    else page.node.delete(PDFName.of('Annots'))
+  }
+}
+
 function stripOverlappingAnnots(
   doc: PDFDocument,
   page: PDFPage,
