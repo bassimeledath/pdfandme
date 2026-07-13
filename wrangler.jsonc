@@ -1,11 +1,15 @@
 {
   "name": "pdfandme",
+  "main": "worker.js",
   "compatibility_date": "2026-07-01",
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "single-page-application"
+    "not_found_handling": "single-page-application",
+    "binding": "ASSETS",
+    "run_worker_first": true
   },
   "workers_dev": true,
+  "preview_urls": false,
   "routes": [
     { "pattern": "pdfandme.com", "custom_domain": true },
     { "pattern": "www.pdfandme.com", "custom_domain": true }
