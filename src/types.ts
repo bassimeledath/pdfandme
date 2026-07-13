@@ -89,10 +89,18 @@ export function displaySize(p: PageMeta): { w: number; h: number } {
   return r === 90 || r === 270 ? { w: p.hPt, h: p.wPt } : { w: p.wPt, h: p.hPt }
 }
 
-export interface SavedSignature {
+export interface InkSignature {
+  kind: 'ink'
   strokes: Pt[][]
   /** aspect = h / w of the drawn bounding box */
   aspect: number
   color?: string
   strokeWidth?: number
 }
+export interface ImageSignature {
+  kind: 'image'
+  /** PNG data URL (typed or uploaded signatures). */
+  dataUrl: string
+  aspect: number
+}
+export type SavedSignature = InkSignature | ImageSignature

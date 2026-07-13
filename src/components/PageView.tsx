@@ -156,18 +156,31 @@ function PageView({ meta, ord, onRequestImage }: Props) {
         }
         const w0 = 180
         const h0 = w0 * sig.aspect
-        s.addAnn({
-          id: newId(),
-          type: 'sig',
-          page: meta.src,
-          x: x - w0 / 2,
-          y: y - h0 / 2,
-          w: w0,
-          h: h0,
-          strokes: sig.strokes,
-          color: sig.color ?? SIG_INK,
-          strokeWidth: sig.strokeWidth ?? 2.2,
-        })
+        if (sig.kind === 'image') {
+          s.addAnn({
+            id: newId(),
+            type: 'image',
+            page: meta.src,
+            x: x - w0 / 2,
+            y: y - h0 / 2,
+            w: w0,
+            h: h0,
+            dataUrl: sig.dataUrl,
+          })
+        } else {
+          s.addAnn({
+            id: newId(),
+            type: 'sig',
+            page: meta.src,
+            x: x - w0 / 2,
+            y: y - h0 / 2,
+            w: w0,
+            h: h0,
+            strokes: sig.strokes,
+            color: sig.color ?? SIG_INK,
+            strokeWidth: sig.strokeWidth ?? 2.2,
+          })
+        }
         s.setTool('select')
         return
       }

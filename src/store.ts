@@ -21,7 +21,13 @@ const SIG_KEY = 'pdfandme.signature.v1'
 export function loadSavedSignature(): SavedSignature | null {
   try {
     const raw = localStorage.getItem(SIG_KEY)
-    return raw ? (JSON.parse(raw) as SavedSignature) : null
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as Record<string, unknown> | null
+    if (!parsed || typeof parsed !== 'object') return null
+    // v1 signatures predate `kind` and were always drawn
+    if (!parsed.kind && parsed.strokes) return { ...parsed, kind: 'ink' } as SavedSignature
+    if (parsed.kind === 'ink' || parsed.kind === 'image') return parsed as unknown as SavedSignature
+    return null
   } catch {
     return null
   }
