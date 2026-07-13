@@ -130,6 +130,13 @@ export default function Editor() {
     if (imgInputRef.current) imgInputRef.current.value = ''
   }
 
+  // whiteout means true redaction on export, which forces form flattening —
+  // so the "keep fields editable" choice isn't offered while one exists
+  const hasWhiteout = s.anns.some(
+    (a) =>
+      a.type === 'whiteout' && s.pages.some((p) => p.src === a.page && !p.deleted),
+  )
+
   const doExport = async (flattenForm: boolean) => {
     if (!s.bytes) return
     setDlOpen(false)
@@ -146,6 +153,14 @@ export default function Editor() {
       a.download = s.fileName.replace(/\.pdf$/i, '') + '-edited.pdf'
       a.click()
       setTimeout(() => URL.revokeObjectURL(a.href), 10_000)
+    } catch (e) {
+      console.error('export failed', e)
+      window.alert(
+        "Couldn't prepare your download." +
+          (hasWhiteout
+            ? ' Securely removing the whited-out content failed on this file — try again, or remove the whiteout boxes.'
+            : ' Please try again.'),
+      )
     } finally {
       setExporting(false)
     }
@@ -174,7 +189,9 @@ export default function Editor() {
         <button
           className="btn-dl"
           disabled={exporting}
-          onClick={() => (s.fields.length > 0 ? setDlOpen((v) => !v) : void doExport(true))}
+          onClick={() =>
+            s.fields.length > 0 && !hasWhiteout ? setDlOpen((v) => !v) : void doExport(true)
+          }
         >
           <IcDownload />
           {exporting ? 'Preparing…' : 'Download'}

@@ -101,6 +101,58 @@ export async function getTextRuns(doc: PDFDocumentProxy, meta: PageMeta): Promis
   return runs
 }
 
+export interface PageRaster {
+  jpg: Uint8Array
+  /** Page size in points, rotation-inclusive — matches the raster's orientation. */
+  wPt: number
+  hPt: number
+}
+
+/**
+ * Render specific pages of a (throwaway) PDF to JPEGs for true redaction.
+ * `bytes` is transferred to the worker — don't reuse the buffer afterwards.
+ */
+export async function rasterizePages(
+  bytes: Uint8Array,
+  pageIndexes: number[],
+): Promise<Map<number, PageRaster>> {
+  const doc = await pdfjs.getDocument({ data: bytes }).promise
+  const out = new Map<number, PageRaster>()
+  const canvas = document.createElement('canvas')
+  try {
+    for (const idx of pageIndexes) {
+      const page = await doc.getPage(idx + 1)
+      const v1 = page.getViewport({ scale: 1 })
+      // cap by dimension and by total area (Safari's canvas floor is ~16.7 Mpx)
+      let scale = Math.min(
+        3,
+        4500 / Math.max(v1.width, v1.height),
+        Math.sqrt(16e6 / (v1.width * v1.height)),
+      )
+      let jpg: Uint8Array | null = null
+      while (!jpg && scale > 0.5) {
+        const viewport = page.getViewport({ scale })
+        canvas.width = Math.floor(viewport.width)
+        canvas.height = Math.floor(viewport.height)
+        const ctx = canvas.getContext('2d')!
+        await page.render({ canvasContext: ctx, viewport }).promise
+        const blob = await new Promise<Blob | null>((res) =>
+          canvas.toBlob(res, 'image/jpeg', 0.92),
+        )
+        if (blob && blob.size > 100) jpg = new Uint8Array(await blob.arrayBuffer())
+        else scale *= 0.7 // oversized canvases fail silently on Safari — retry smaller
+      }
+      if (!jpg) throw new Error(`could not rasterize page ${idx + 1}`)
+      out.set(idx, { jpg, wPt: v1.width, hPt: v1.height })
+    }
+  } finally {
+    canvas.width = 0
+    canvas.height = 0
+    await doc.destroy()
+  }
+  return out
+}
+
 /**
  * Kick off a page render. Returns a cancel function — call it before starting
  * another render into the same canvas (pdf.js forbids overlapping renders).

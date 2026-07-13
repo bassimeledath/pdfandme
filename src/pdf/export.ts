@@ -1,8 +1,13 @@
 import {
   BlendMode,
   LineCapStyle,
+  PDFArray,
+  PDFDict,
   PDFDocument,
   PDFFont,
+  PDFName,
+  PDFNumber,
+  PDFObject,
   PDFPage,
   StandardFonts,
   degrees,
@@ -10,6 +15,7 @@ import {
 } from 'pdf-lib'
 import { Ann, FormFieldMeta, InkAnn, PageMeta, TextAnn, totalRot } from '../types'
 import { boxToPdf, toPdf } from './coords'
+import { rasterizePages } from './pdfjs'
 
 const HIGHLIGHT = rgb(1, 0.894, 0.369)
 const INK_COLORS: Record<string, [number, number, number]> = {
@@ -41,14 +47,24 @@ export async function exportPdf(
   const doc = await PDFDocument.load(srcBytes, { ignoreEncryption: true })
   const font = await doc.embedFont(StandardFonts.Helvetica)
 
+  // live pages with a whiteout get truly redacted: the page is replaced by a
+  // raster of itself, so the covered content is removed — not merely hidden
+  const live = pages.filter((p) => !p.deleted)
+  const redactedOrds: number[] = []
+  live.forEach((p, ord) => {
+    if (anns.some((a) => a.type === 'whiteout' && a.page === p.src)) redactedOrds.push(ord)
+  })
+  const redact = redactedOrds.length > 0
+
   // 1) form values
   fillForm(doc, fields, formValues)
 
-  // 2) page structure changes require flattening the form (copied pages lose AcroForm)
+  // 2) page structure changes require flattening the form (copied pages lose
+  //    AcroForm); redaction rebuilds the doc, so it forces flattening too
   const structureChanged =
     pages.some((p) => p.deleted || p.extraRot !== 0) ||
     pages.some((p, i) => p.src !== i)
-  const mustFlatten = opts.flattenForm || structureChanged
+  const mustFlatten = opts.flattenForm || structureChanged || redact
 
   if (mustFlatten) {
     try {
@@ -73,15 +89,90 @@ export async function exportPdf(
     }
   }
 
-  // 5) delete + reorder via copy into a fresh doc when needed
-  if (structureChanged) {
-    const out = await PDFDocument.create()
-    const order = pages.filter((p) => !p.deleted).map((p) => p.src)
-    const copied = await out.copyPages(doc, order)
-    copied.forEach((pg) => out.addPage(pg))
-    return out.save()
+  if (!structureChanged && !redact) return doc.save()
+
+  // 5) delete + reorder via copy into a fresh doc (final page order — for
+  //    redaction this runs even when the order is identity, so that page
+  //    index i below == output page i)
+  const mid = await PDFDocument.create()
+  const copied = await mid.copyPages(doc, live.map((p) => p.src))
+  copied.forEach((pg) => mid.addPage(pg))
+  if (!redact) return mid.save()
+
+  return redactPages(mid, live, anns, redactedOrds)
+}
+
+/**
+ * Replace each page that has a whiteout with a high-res JPEG of itself.
+ * `mid` holds the fully drawn, flattened document in final page order.
+ */
+async function redactPages(
+  mid: PDFDocument,
+  live: PageMeta[],
+  anns: Ann[],
+  redactedOrds: number[],
+): Promise<Uint8Array> {
+  // source annotations paint above page content when rendered, so any that
+  // overlap a whiteout would leak into the raster — drop them first
+  for (const ord of redactedOrds) {
+    const meta = live[ord]
+    const boxes = anns
+      .filter((a) => a.type === 'whiteout' && a.page === meta.src)
+      .map((a) => boxToPdf(meta, a.x, a.y, a.w, a.h))
+    stripOverlappingAnnots(mid, mid.getPage(ord), boxes)
   }
-  return doc.save()
+
+  // pdf.js detaches the buffer it's handed; `mid` itself stays usable below
+  const rasters = await rasterizePages(await mid.save(), redactedOrds)
+
+  const out = await PDFDocument.create()
+  const redactedSet = new Set(redactedOrds)
+  const keepOrds = live.map((_, ord) => ord).filter((ord) => !redactedSet.has(ord))
+  // single copyPages call so fonts/resources shared across pages stay deduped
+  const kept = await out.copyPages(mid, keepOrds)
+  let k = 0
+  for (let ord = 0; ord < live.length; ord++) {
+    const r = rasters.get(ord)
+    if (r) {
+      const img = await out.embedJpg(r.jpg)
+      out.addPage([r.wPt, r.hPt]).drawImage(img, { x: 0, y: 0, width: r.wPt, height: r.hPt })
+    } else {
+      out.addPage(kept[k++])
+    }
+  }
+  return out.save()
+}
+
+function stripOverlappingAnnots(
+  doc: PDFDocument,
+  page: PDFPage,
+  boxes: { x: number; y: number; w: number; h: number }[],
+) {
+  const annots = page.node.Annots()
+  if (!annots) return
+  const keep: PDFObject[] = []
+  for (let i = 0; i < annots.size(); i++) {
+    const el = annots.get(i)
+    let overlaps = true // unparseable geometry → strip; safer for redaction
+    try {
+      const dict = doc.context.lookupMaybe(el, PDFDict)
+      const rect = dict?.lookupMaybe(PDFName.of('Rect'), PDFArray)
+      if (rect && rect.size() === 4) {
+        const n = [0, 1, 2, 3].map((j) => rect.lookup(j, PDFNumber).asNumber())
+        const [rx0, rx1] = [Math.min(n[0], n[2]), Math.max(n[0], n[2])]
+        const [ry0, ry1] = [Math.min(n[1], n[3]), Math.max(n[1], n[3])]
+        overlaps = boxes.some(
+          (b) => rx0 < b.x + b.w && rx1 > b.x && ry0 < b.y + b.h && ry1 > b.y,
+        )
+      }
+    } catch {
+      /* keep overlaps = true */
+    }
+    if (!overlaps) keep.push(el)
+  }
+  if (keep.length === annots.size()) return
+  if (keep.length) page.node.set(PDFName.of('Annots'), doc.context.obj(keep))
+  else page.node.delete(PDFName.of('Annots'))
 }
 
 function fillForm(

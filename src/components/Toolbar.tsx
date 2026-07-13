@@ -24,8 +24,13 @@ const MAIN: { tool: Tool; label: string; icon: () => JSX.Element }[] = [
   { tool: 'draw', label: 'Draw', icon: IcDraw },
 ]
 
-const MORE: { tool: Tool; label: string; icon: () => JSX.Element }[] = [
-  { tool: 'whiteout', label: 'Whiteout', icon: IcWhiteout },
+const MORE: { tool: Tool; label: string; icon: () => JSX.Element; hint?: string }[] = [
+  {
+    tool: 'whiteout',
+    label: 'Whiteout',
+    icon: IcWhiteout,
+    hint: "What's underneath is truly removed on download",
+  },
   { tool: 'check', label: 'Check', icon: IcCheck },
   { tool: 'cross', label: 'Cross', icon: IcCross },
   { tool: 'date', label: 'Date', icon: IcDate },
@@ -75,10 +80,11 @@ export default function Toolbar() {
         </button>
         {moreOpen && (
           <div className="more-pop">
-            {MORE.map(({ tool: t, label, icon: Icon }) => (
+            {MORE.map(({ tool: t, label, icon: Icon, hint }) => (
               <button
                 key={t}
                 className={`pop-item${tool === t ? ' active' : ''}`}
+                title={hint}
                 onClick={() => {
                   setTool(t)
                   setMoreOpen(false)
